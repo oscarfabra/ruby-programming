@@ -1,4 +1,4 @@
-programming-with-ruby
-=====================
+ruby-programming
+================
 
-Tealeaf Academy's Introduction to Programming with Ruby
+Ruby exercises based on various tutorials and demos.
