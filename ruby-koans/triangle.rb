@@ -26,7 +26,7 @@ def triangle(a, b, c)
         if (h == a && (b + c <= a)) || (h == b && (a + c <= b)) || 
             (h == c && (a + b <= c))
           raise TriangleError, 
-            "Hypotenuse must be bigger than the sum of the two other sides."
+            "Hypotenuse must be smaller than the sum of the two other sides."
         end
       end
     end
