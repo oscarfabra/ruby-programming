@@ -48,9 +48,9 @@ def score(dice)
   dice.each {|n| h[n] += 1 }  # Adds 1 to the value with key n.
 
   # Message in stdout for debugging purposes.
-  puts "-" * 22
-  puts "Dice rolled:"
-  h.each { |n, value| puts "Number #{n} is #{value} time(s)."}
+  # puts "-" * 22
+  # puts "Dice rolled:"
+  # h.each { |n, value| puts "Number #{n} is #{value} time(s)."}
   
   # Considers ones, adding points as appropriate.
   points_count = 0
