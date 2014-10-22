@@ -14,7 +14,7 @@
 #   about_triangle_project_2.rb
 #
 def triangle(a, b, c)
-	begin
+  begin
     if a == 0 || b == 0 || c == 0
       raise TriangleError, "All sides must be greater than 0."
     elsif a < 0 || b < 0 || c < 0

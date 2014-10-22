@@ -30,7 +30,58 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 # Your goal is to write the score method.
 
 def score(dice)
-  # You need to write this method
+  
+  # Number of rolled dices must be between 0 and 5.
+  if !dice || dice.size > 5
+    raise StandardError, "Number of rolled dices should be between 0 and 5."
+  else
+    # Checks whether dice contains only valid numbers.
+    dice.each do |n|
+      if n < 1 || n > 6
+        raise StandardError, "Dice must only contain numbers between 1 and 6."
+      end
+    end
+  end
+
+  # Walks through the array counting the numbers of each dice.
+  h = Hash.new(0)             # Initializes all values with 0.
+  dice.each {|n| h[n] += 1 }  # Adds 1 to the value with key n.
+
+  # Message in stdout for debugging purposes.
+  puts "-" * 22
+  puts "Dice rolled:"
+  h.each { |n, value| puts "Number #{n} is #{value} time(s)."}
+  
+  # Considers ones, adding points as appropriate.
+  points_count = 0
+  if h[1] >= 3
+    points_count += 1000      # A set of three ones is 1000 points.
+    h[1] -= 3
+  end
+
+  h[1].times do
+    points_count += 100     # Adds 100 points for each additional one.
+  end
+
+  # Considers the other numbers, adding points as appropriate.
+  (2..6).each do |n|
+    if h[n] >= 3
+      points_count += n * 100 # A set of three numbers is worth 100 * n.
+      h[n] -= 3
+    end
+  end
+
+  h[5].times do
+    points_count += 50        # Adds 50 for each additional 5.
+  end
+
+  points_count                # Returns the number of points.
+
+rescue StandardError => ex
+
+  # Throws exception out of the method.
+  raise ex.class, ex.message
+
 end
 
 class AboutScoringProject < Neo::Koan
