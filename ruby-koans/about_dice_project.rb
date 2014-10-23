@@ -15,11 +15,6 @@ class DiceSet
     @values = Array.new(dice_number) do |dice|
       @values[dice] = 1 + rand(6)     # Sets a random value for each dice
     end
-    @values
-  end
-
-  def get_values
-    @values
   end
 end
 
