@@ -128,6 +128,7 @@ class AboutClasses < Neo::Koan
     end
     # THINK ABOUT IT:
     # Why is this so?
+    # Answer: Because no default value is being provided.
   end
 
   def test_different_objects_have_different_instance_variables
