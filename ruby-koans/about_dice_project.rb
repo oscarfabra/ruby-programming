@@ -1,7 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/neo')
 
-# DiceSet simulates a set of Dice that can be rolled.
-
+# DiceSet is a class that simulates a set of Dice that can be rolled for the
+# GREED game.
+#
 class DiceSet
 
   attr_reader :values
