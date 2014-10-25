@@ -15,7 +15,7 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 #------------------------------------------------------------------------------
 class DiceSet
 
-  attr_reader :values  # Stores the points gotten for rolling dice
+  attr_reader :values  # Stores the points obtained for rolling dice
 
   # Rolls the specified number of dice
   def roll(dice_number)
@@ -109,12 +109,7 @@ class Game
       last_round = false
       while !last_round
         round(players)
-        (0...players_number).each do |i|
-          if players[i] >= 3000
-            last_round = true
-            break
-          end
-        end
+        last_round = true if players.max >= 3000
       end      
       # All players take last turn
       round(players)
@@ -146,10 +141,6 @@ end
 # The about extra credit program should pass the following tests:
 #
 class AboutExtraCredit < Neo::Koan
-    def test_can_create_a_dice_set
-    dice = DiceSet.new
-    assert_not_nil dice
-  end
 
   def test_rolling_the_dice_returns_a_set_of_integers_between_1_and_6
     dice = DiceSet.new
@@ -162,14 +153,6 @@ class AboutExtraCredit < Neo::Koan
     end
   end
 
-  def test_dice_values_do_not_change_unless_explicitly_rolled
-    dice = DiceSet.new
-    dice.roll(5)
-    first_time = dice.values
-    second_time = dice.values
-    assert_equal first_time, second_time
-  end
-
   def test_dice_values_should_change_between_rolls
     dice = DiceSet.new
 
@@ -180,21 +163,21 @@ class AboutExtraCredit < Neo::Koan
     second_time = dice.values.dup
 
     assert_not_equal first_time, second_time, "Two rolls should not be equal"
-
-    # THINK ABOUT IT:
-    #
-    # If the rolls are random, then it is possible (although not
-    # likely) that two consecutive rolls are equal.  What would be a
-    # better way to test this?
   end
 
-  def test_you_can_roll_different_numbers_of_dice
-    dice = DiceSet.new
+  def test_player_doesnt_accumulate_points_unless_it_gets_300_points
+    # TODO: Write test
+  end
 
-    dice.roll(3)
-    assert_equal 3, dice.values.size
+  def test_after_scoring_player_can_only_roll_non_scoring_dice
+    # TODO: Write test
+  end
 
-    dice.roll(1)
-    assert_equal 1, dice.values.size
+  def test_if_roll_has_zero_points_player_loses_accumulated_score
+    # TODO: Write test    
+  end
+
+  def test_when_player_decides_to_stop_accumulated_points_are_added_to_its_total
+    # TODO: Write test
   end
 end
