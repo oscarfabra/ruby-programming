@@ -7,13 +7,13 @@ class DiceSet
   attr_reader :values
 
   def initialize
-    @values = Array.new               # Initializes the values Array
+    @values = Array.new  # Initializes the values Array
   end
 
   # Rolls the specified number of dice
   def roll(dice_number)
-    @values = Array.new(dice_number) do |dice|
-      @values[dice] = 1 + rand(6)     # Sets a random value for each dice
+    @values = Array.new(dice_number) do |i|
+      @values[i] = 1 + rand(6)  # Sets a random value for each dice
     end
   end
 end
@@ -47,19 +47,18 @@ class AboutDiceProject < Neo::Koan
     dice = DiceSet.new
 
     dice.roll(5)
-    first_time = dice.values
+    first_time = dice.values.dup
 
     dice.roll(5)
-    second_time = dice.values
+    second_time = dice.values.dup
 
-    assert_equal 0, first_time <=> second_time, "Two rolls should not be equal"
+    assert_not_equal first_time, second_time, "Two rolls should not be equal"
 
     # THINK ABOUT IT:
     #
     # If the rolls are random, then it is possible (although not
     # likely) that two consecutive rolls are equal.  What would be a
     # better way to test this?
-    # Answer: Using the comparison operator <=> and ensuring it is equal to 0.
   end
 
   def test_you_can_roll_different_numbers_of_dice
