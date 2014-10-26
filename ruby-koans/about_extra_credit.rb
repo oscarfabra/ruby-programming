@@ -126,8 +126,8 @@ class Player
         # Updates the number of dice that the player can use now
         dice_number = (dice.non_scoring == 0)? 5 : dice.non_scoring
         
-        print "#{dice_number} dice for use. #{points_of_turn} points accumulated "
-        print "on this turn so far.\nRoll again? (y/n) "
+        print "#{points_of_turn} points accumulated on this turn. "
+        print "#{dice_number} dice for use.\nRoll again? (y/n) "
         opc = gets.chomp.to_s
         continue = false if (opc == "n" || opc == "N")
       end
@@ -137,8 +137,10 @@ class Player
     if @points_count == 0 && points_of_turn < 300
       puts "You didn't reach 300 points. No points accumulated!"
     else
+      if points_of_turn > 0
+        puts "#{points_of_turn} points accumulated on this turn. Good!"
+      end
       @points_count += points_of_turn
-      puts "#{points_of_turn} points accumulated on this turn. Good!"
     end
     puts "You have a total of #{points_count} points so far."    
   end
@@ -166,9 +168,13 @@ class Game
       last_round = false
       while !last_round
         round(players)
-        last_round = true if players.values.max >= 3000
-      end      
+        (0...players_number).each do |i|
+          last_round = true if players[i].points_count >= 3000
+        end
+      end
       # All players take last turn
+      puts "*" * 60
+      puts "Entering final round...!!!"
       round(players)
       # Finds the winner and its score
       winner = 0
@@ -180,7 +186,8 @@ class Game
         end
       end
       puts "*" * 60
-      puts "Player #{winner} wins with score #{max_score}."
+      puts "Player #{winner} wins with score #{max_score}. Bye!"
+      puts "*" * 60
     end
 
     private
@@ -190,6 +197,7 @@ class Game
           puts "-" * 60
           puts "It's player #{i + 1}'s turn:"
           players[i].turn!
+          break if players[i].points_count >= 3000
         end
       end
   end
@@ -272,11 +280,10 @@ class AboutExtraCredit < Neo::Koan
   end
 
   def test_game_should_play_well_for_two_or_more_players
-    # Should work well for 2 or 3 players
-    puts "About to play with 2 players..."
+    # If there's an error, an exception would be raised
+    puts ""
     Game.play(2)
-
-    puts "About to play with 3 players..."
+    puts ""
     Game.play(3)
   end
 end
