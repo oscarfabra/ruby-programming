@@ -105,41 +105,42 @@ class Player
     points_of_turn = 0
 
     while continue
-      print "Hit enter to roll #{dice_number} dice: "
+      print "Hit enter to roll #{dice_number} dice..."
       gets.chomp
 
       # Player rolls dice and its points are recorded
       dice.roll(dice_number)
       values = dice.values.dup
       score = dice.score(values)
-      print "The values obtained are: #{values}."
+      puts "The values obtained are: #{values}."
 
       if score == 0
-        print "You got 0 points on this roll... You loose your turn and the"
-        print "points accumulated on this turn. Sorry!"
+        puts "You got 0 points on this roll... You loose your turn"
+        puts "and the accumulated points of this turn. Sorry!"
         points_of_turn = 0
         continue = false
       else
         # Adds score to the points of this turn
         points_of_turn += score
 
-        # Updates the number of dice player can use now
+        # Updates the number of dice that the player can use now
         dice_number = (dice.non_scoring == 0)? 5 : dice.non_scoring
         
-        print "#{dice_number} dice for use. #{points_of_turn} points accumulated\n"
-        print "on this turn. Roll again? (y/n) "
+        print "#{dice_number} dice for use. #{points_of_turn} points accumulated "
+        print "on this turn so far.\nRoll again? (y/n) "
         opc = gets.chomp.to_s
         continue = false if (opc == "n" || opc == "N")
       end
     end
 
-    # Adds points of turn to total score
+    # Adds points of turn to total score and display corrsponding messages
     if @points_count == 0 && points_of_turn < 300
       puts "You didn't reach 300 points. No points accumulated!"
     else
       @points_count += points_of_turn
       puts "#{points_of_turn} points accumulated on this turn. Good!"
-    end    
+    end
+    puts "You have a total of #{points_count} points so far."    
   end
 end
 
@@ -153,8 +154,14 @@ class Game
 
     # Simulates a new Greed Game given a number of players
     def play(players_number)
-      players = Array.new  # Array of Player objects
-      puts "-" * 20
+      # Ensures players_number is at least 2
+      if players_number < 2
+        raise GreedError, "Greed must be played with at least 2 players."        
+      end
+      # Initializes Array of Player objects
+      players = Array.new
+      players_number.times { players << Player.new }
+      puts "*" * 60
       puts "Starting Greed game with #{players_number} players:"
       last_round = false
       while !last_round
@@ -172,15 +179,15 @@ class Game
           winner = i + 1
         end
       end
-      puts "-" * 20
+      puts "*" * 60
       puts "Player #{winner} wins with score #{max_score}."
     end
 
     private
       # All players take a turn and their scores are updated accordingly
-      def round(*players)
+      def round(players)
         (0...players.size).each do |i| 
-          puts "-" * 20
+          puts "-" * 60
           puts "It's player #{i + 1}'s turn:"
           players[i].turn!
         end
@@ -266,11 +273,10 @@ class AboutExtraCredit < Neo::Koan
 
   def test_game_should_play_well_for_two_or_more_players
     # Should work well for 2 or 3 players
-    assert_nothing_raised(Exception) do
-      Game.play(2)
-    end
-    assert_nothing_raised(Exception) do
-      Game.play(3)
-    end
+    puts "About to play with 2 players..."
+    Game.play(2)
+
+    puts "About to play with 3 players..."
+    Game.play(3)
   end
 end
