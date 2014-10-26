@@ -15,7 +15,12 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 #------------------------------------------------------------------------------
 class DiceSet
 
-  attr_reader :values  # Stores the points obtained for rolling dice
+  # Stores the points obtained for rolling dice
+  attr_reader :values
+
+  def initialize
+    @values = Array.new  # Initializes the values Array
+  end
 
   # Rolls the specified number of dice
   def roll(dice_number)
@@ -30,12 +35,13 @@ end
 #------------------------------------------------------------------------------
 class Player
 
-  # Hash that accumulates points for last turn
-  attr_accessor :points_on_last_turn
-  # Keeps the score of this player
-  attr_reader :points_count
+  attr_reader :points_count  # Keeps the total score of the player
 
-  def turn
+  def initialize
+    @points_count = 0
+  end
+
+  def turn!
     # TODO: A player takes a turn
   end
 end
@@ -47,7 +53,7 @@ end
 class Game
 
   #----------------------------------------------------------------------------
-  # class methods
+  # Class methods
   #----------------------------------------------------------------------------
 
   class << self
@@ -103,13 +109,13 @@ class Game
 
     # Simulates a new Greed Game given a number of players
     def play(players_number)
-      players = []  # Initializes an Array of players' scores
+      players = Array.new  # Array of Player objects
       puts "-" * 20
       puts "Starting Greed game with #{players_number} players:"
       last_round = false
       while !last_round
         round(players)
-        last_round = true if players.max >= 3000
+        last_round = true if players.values.max >= 3000
       end      
       # All players take last turn
       round(players)
@@ -117,8 +123,8 @@ class Game
       winner = 0
       max_score = 0
       (0...players_number).each do |i|
-        if players[i] >= max_score
-          max_score = players[i]
+        if players[i].points_count >= max_score
+          max_score = players[i].points_count
           winner = i + 1
         end
       end
@@ -131,16 +137,23 @@ class Game
     #--------------------------------------------------------------------------
 
     private
+      # All players take a turn and their scores are added
       def round(*players)
-        # TODO: All players take a turn and their scores are added
+        players.each do |player| 
+          player.turn!
+        end
       end
   end
-  
 end
 
+#------------------------------------------------------------------------------
 # The about extra credit program should pass the following tests:
-#
+#------------------------------------------------------------------------------
 class AboutExtraCredit < Neo::Koan
+
+  #----------------------------------------------------------------------------
+  # DiceSet unit tests
+  #----------------------------------------------------------------------------
 
   def test_rolling_the_dice_returns_a_set_of_integers_between_1_and_6
     dice = DiceSet.new
@@ -165,6 +178,34 @@ class AboutExtraCredit < Neo::Koan
     assert_not_equal first_time, second_time, "Two rolls should not be equal"
   end
 
+  #----------------------------------------------------------------------------
+  # Game scoring unit tests
+  #----------------------------------------------------------------------------
+
+  def test_score_of_multiple_1s_and_5s_is_the_sum_of_individual_scores
+    assert_equal 300, Game.score([1,5,5,1])
+  end
+
+  def test_score_of_other_triples_is_100x
+    assert_equal 200, Game.score([2,2,2])
+    assert_equal 300, Game.score([3,3,3])
+    assert_equal 400, Game.score([4,4,4])
+    assert_equal 500, Game.score([5,5,5])
+    assert_equal 600, Game.score([6,6,6])
+  end
+
+  def test_score_of_mixed_is_sum
+    assert_equal 250, Game.score([2,5,2,2,3])
+    assert_equal 550, Game.score([5,5,5,5])
+    assert_equal 1100, Game.score([1,1,1,1])
+    assert_equal 1200, Game.score([1,1,1,1,1])
+    assert_equal 1150, Game.score([1,1,1,5,1])
+  end
+
+  #----------------------------------------------------------------------------
+  # Player unit tests
+  #----------------------------------------------------------------------------
+
   def test_player_doesnt_accumulate_points_unless_it_gets_300_points
     # TODO: Write test
   end
@@ -178,6 +219,22 @@ class AboutExtraCredit < Neo::Koan
   end
 
   def test_when_player_decides_to_stop_accumulated_points_are_added_to_its_total
+    # TODO: Write test
+  end
+
+  #----------------------------------------------------------------------------
+  # Game integration tests
+  #----------------------------------------------------------------------------
+
+  def test_game_should_have_at_least_two_players
+    # TODO: Write test
+  end
+
+  def test_once_a_player_reaches_3000_points_game_enters_final_round
+    # TODO: Write test
+  end
+    
+  def test_winner_is_player_with_highest_score_after_final_round
     # TODO: Write test
   end
 end
