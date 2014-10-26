@@ -134,7 +134,12 @@ class Player
     end
 
     # Adds points of turn to total score
-    @points_count += points_of_turn
+    if @points_count == 0 && points_of_turn < 300
+      puts "You didn't reach 300 points. No points accumulated!"
+    else
+      @points_count += points_of_turn
+      puts "#{points_of_turn} points accumulated on this turn. Good!"
+    end    
   end
 end
 
@@ -175,11 +180,16 @@ class Game
       # All players take a turn and their scores are updated accordingly
       def round(*players)
         (0...players.size).each do |i| 
-          puts "Player #{i + 1}'s turn:"
+          puts "-" * 20
+          puts "It's player #{i + 1}'s turn:"
           players[i].turn!
         end
       end
   end
+end
+
+# Own error class, for testing purposes
+class GreedError < StandardError
 end
 
 #------------------------------------------------------------------------------
@@ -242,38 +252,25 @@ class AboutExtraCredit < Neo::Koan
   end
 
   #----------------------------------------------------------------------------
-  # Player unit tests
-  #----------------------------------------------------------------------------
-
-  def test_player_doesnt_accumulate_points_unless_it_gets_300_points
-    # TODO: Write test
-  end
-
-  def test_after_scoring_player_can_only_roll_non_scoring_dice
-    # TODO: Write test
-  end
-
-  def test_if_roll_has_zero_points_player_loses_accumulated_score
-    # TODO: Write test    
-  end
-
-  def test_when_player_stops_accumulated_points_are_added_to_its_total
-    # TODO: Write test
-  end
-
-  #----------------------------------------------------------------------------
   # Game integration tests
   #----------------------------------------------------------------------------
 
   def test_game_should_have_at_least_two_players
-    # TODO: Write test
+    # Should raise exception for 0 or 1 players
+    (0..1).each do |players_number|
+      assert_raise(GreedError) do
+        Game.play(players_number)
+      end
+    end
   end
 
-  def test_once_a_player_reaches_3000_points_game_enters_final_round
-    # TODO: Write test
-  end
-    
-  def test_winner_is_player_with_highest_score_after_final_round
-    # TODO: Write test
+  def test_game_should_play_well_for_two_or_more_players
+    # Should work well for 2 or 3 players
+    assert_nothing_raised(Exception) do
+      Game.play(2)
+    end
+    assert_nothing_raised(Exception) do
+      Game.play(3)
+    end
   end
 end
