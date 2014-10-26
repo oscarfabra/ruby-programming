@@ -18,6 +18,9 @@ class DiceSet
   # Stores the points obtained for rolling dice
   attr_reader :values
 
+  # Stores the non-scoring dice of last roll (if any)
+  attr_reader :non_scoring
+
   def initialize
     @values = Array.new  # Initializes the values Array
   end
@@ -27,6 +30,59 @@ class DiceSet
     @values = Array.new(dice_number) do |i|
       @values[i] = 1 + rand(6)  # Sets a random value for each dice
     end
+  end
+
+  # Computes the score for a given dice, updating @non_scoring variable
+  def score(dice)
+    
+    if !dice || dice.size > 5
+      # Number of rolled dices must be between 0 and 5.
+      raise StandardError, "Number of dices should be between 0 and 5."
+    else
+      # Checks whether dice contains only valid numbers.
+      dice.each do |n|
+        if n < 1 || n > 6
+          raise StandardError, "A die must contain a number between 1 and 6."
+        end
+      end
+    end
+
+    h = Hash.new(0)  # For counting the frequency of each dice number.
+    @non_scoring = dice.size  # For counting non_scoring dice.
+    dice.each {|n| h[n] += 1 }  # Adds 1 to the value with key n.
+
+    # Considers ones, adding points as appropriate.
+    points_count = 0
+    if h[1] >= 3
+      points_count += 1000  # A set of three ones is 1000 points.
+      h[1] -= 3
+      @non_scoring -= 3
+    end
+
+    h[1].times do
+      points_count += 100  # Adds 100 points for each additional one.
+      @non_scoring -= 1
+    end
+
+    # Considers the other numbers, adding points as appropriate.
+    (2..6).each do |n|
+      if h[n] >= 3
+        points_count += n * 100  # A set of three numbers is worth 100 * n.
+        h[n] -= 3
+        @non_scoring -= 3
+      end
+    end
+
+    h[5].times do
+      points_count += 50  # Adds 50 for each additional 5.
+      @non_scoring -= 1
+    end
+
+    points_count  # Returns the number of points.
+
+  rescue StandardError => ex
+    # Throws exception out of the method.
+    raise ex.class, ex.message
   end
 end
 
@@ -41,8 +97,44 @@ class Player
     @points_count = 0
   end
 
+  # A player takes a turn to play and its total score is updated
   def turn!
-    # TODO: A player takes a turn
+    dice = DiceSet.new
+    dice_number = 5
+    continue = true
+    points_of_turn = 0
+
+    while continue
+      print "Hit enter to roll #{dice_number} dice: "
+      gets.chomp
+
+      # Player rolls dice and its points are recorded
+      dice.roll(dice_number)
+      values = dice.values.dup
+      score = dice.score(values)
+      print "The values obtained are: #{values}."
+
+      if score == 0
+        print "You got 0 points on this roll... You loose your turn and the"
+        print "points accumulated on this turn. Sorry!"
+        points_of_turn = 0
+        continue = false
+      else
+        # Adds score to the points of this turn
+        points_of_turn += score
+
+        # Updates the number of dice player can use now
+        dice_number = (dice.non_scoring == 0)? 5 : dice.non_scoring
+        
+        print "#{dice_number} dice for use. #{points_of_turn} points accumulated\n"
+        print "on this turn. Roll again? (y/n) "
+        opc = gets.chomp.to_s
+        continue = false if (opc == "n" || opc == "N")
+      end
+    end
+
+    # Adds points of turn to total score
+    @points_count += points_of_turn
   end
 end
 
@@ -52,60 +144,7 @@ end
 #------------------------------------------------------------------------------
 class Game
 
-  #----------------------------------------------------------------------------
-  # Class methods
-  #----------------------------------------------------------------------------
-
   class << self
-
-    # Calculates the score for a given dice
-    def score(dice)
-      
-      if !dice || dice.size > 5
-        # Number of rolled dices must be between 0 and 5.
-        raise StandardError, "Number of dices should be between 0 and 5."
-      else
-        # Checks whether dice contains only valid numbers.
-        dice.each do |n|
-          if n < 1 || n > 6
-            raise StandardError, "A die must contain a number between 1 and 6."
-          end
-        end
-      end
-
-      # Walks through the array counting the numbers of each dice.
-      h = Hash.new(0)             # Initializes all values with 0.
-      dice.each {|n| h[n] += 1 }  # Adds 1 to the value with key n.
-
-      # Considers ones, adding points as appropriate.
-      points_count = 0
-      if h[1] >= 3
-        points_count += 1000      # A set of three ones is 1000 points.
-        h[1] -= 3
-      end
-
-      h[1].times do
-        points_count += 100     # Adds 100 points for each additional one.
-      end
-
-      # Considers the other numbers, adding points as appropriate.
-      (2..6).each do |n|
-        if h[n] >= 3
-          points_count += n * 100 # A set of three numbers is worth 100 * n.
-          h[n] -= 3
-        end
-      end
-
-      h[5].times do
-        points_count += 50        # Adds 50 for each additional 5.
-      end
-
-      points_count                # Returns the number of points.
-
-    rescue StandardError => ex
-      # Throws exception out of the method.
-      raise ex.class, ex.message
-    end
 
     # Simulates a new Greed Game given a number of players
     def play(players_number)
@@ -132,15 +171,12 @@ class Game
       puts "Player #{winner} wins with score #{max_score}."
     end
 
-    #--------------------------------------------------------------------------
-    # private class methods
-    #--------------------------------------------------------------------------
-
     private
-      # All players take a turn and their scores are added
+      # All players take a turn and their scores are updated accordingly
       def round(*players)
-        players.each do |player| 
-          player.turn!
+        (0...players.size).each do |i| 
+          puts "Player #{i + 1}'s turn:"
+          players[i].turn!
         end
       end
   end
@@ -178,28 +214,31 @@ class AboutExtraCredit < Neo::Koan
     assert_not_equal first_time, second_time, "Two rolls should not be equal"
   end
 
-  #----------------------------------------------------------------------------
-  # Game scoring unit tests
-  #----------------------------------------------------------------------------
+  def test_score_of_various_sample_dice
+    dice = DiceSet.new
 
-  def test_score_of_multiple_1s_and_5s_is_the_sum_of_individual_scores
-    assert_equal 300, Game.score([1,5,5,1])
+    # Score of multiple 1s and 5s is the sum of individual scores
+    assert_equal 300, dice.score([1,5,5,1])
+  
+    # Score of other triples is 100x
+    assert_equal 200, dice.score([2,2,2])
+    assert_equal 300, dice.score([3,3,3])
+    assert_equal 400, dice.score([4,4,4])
+    assert_equal 500, dice.score([5,5,5])
+    assert_equal 600, dice.score([6,6,6])
   end
 
-  def test_score_of_other_triples_is_100x
-    assert_equal 200, Game.score([2,2,2])
-    assert_equal 300, Game.score([3,3,3])
-    assert_equal 400, Game.score([4,4,4])
-    assert_equal 500, Game.score([5,5,5])
-    assert_equal 600, Game.score([6,6,6])
-  end
+  def test_score_of_sample_dices_and_non_scoring_dice
+    dice = DiceSet.new
+    
+    assert_equal 250, dice.score([5,1,3,4,1])
+    assert_equal 2, dice.non_scoring
 
-  def test_score_of_mixed_is_sum
-    assert_equal 250, Game.score([2,5,2,2,3])
-    assert_equal 550, Game.score([5,5,5,5])
-    assert_equal 1100, Game.score([1,1,1,1])
-    assert_equal 1200, Game.score([1,1,1,1,1])
-    assert_equal 1150, Game.score([1,1,1,5,1])
+    assert_equal 1100, dice.score([1,1,1,3,1])
+    assert_equal 1, dice.non_scoring
+
+    assert_equal 450, dice.score([2,4,4,5,4])
+    assert_equal 1, dice.non_scoring
   end
 
   #----------------------------------------------------------------------------
@@ -218,7 +257,7 @@ class AboutExtraCredit < Neo::Koan
     # TODO: Write test    
   end
 
-  def test_when_player_decides_to_stop_accumulated_points_are_added_to_its_total
+  def test_when_player_stops_accumulated_points_are_added_to_its_total
     # TODO: Write test
   end
 
