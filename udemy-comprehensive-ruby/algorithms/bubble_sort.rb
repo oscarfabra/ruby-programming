@@ -20,10 +20,10 @@ def bubble_sort(a)
     end
 
     n -= 1
-  end
+  end # Ends while
 
   a
-end
+end # Ends bubble_sort method
 
 a = [4, 3, 5, 2, 1, 3, 5, 4]
 p bubble_sort a
