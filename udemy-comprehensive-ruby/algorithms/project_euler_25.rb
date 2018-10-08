@@ -3,9 +3,7 @@
 
 def first_term_in_fibonacci_to_contain_given_digits(digits)
   
-  if digits == 1
-    return 1
-  end
+  return 1 if digits == 1
 
   i, a, b = 2, 1, 1
   while b.to_s.length < digits
